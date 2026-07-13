@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Clientes | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="page-box">
+    <div class="header-row">
+        <div>
+            <h1>👥 Gestão de Clientes</h1>
+            <p>Selecione um cliente para entrar na sua área exclusiva.</p>
+        </div>
+        <a class="btn-secondary" href="{{ url_for('dashboard') }}">Voltar</a>
+    </div>
+
+    <a href="{{ url_for('novo_cliente') }}"><button class="btn">➕ Novo Cliente</button></a>
+
+    <div class="section-text">
+        <p>Ver informações principais e aceder ao painel do cliente.</p>
+    </div>
+
+    <table class="data-table">
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Ações</th>
+        </tr>
+        {% for cliente in clients %}
+        <tr>
+            <td>{{ cliente.id }}</td>
+            <td>{{ cliente.nome }}</td>
+            <td>{{ cliente.email }}</td>
+            <td>{{ cliente.telefone }}</td>
+            <td><a class="link-button" href="{{ url_for('cliente_detalhes', client_id=cliente.id) }}">Ver cliente</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+</body>
+</html>

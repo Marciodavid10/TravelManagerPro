@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Cliente | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="page-box">
+    <div class="header-row">
+        <div>
+            <h1>👤 Cliente</h1>
+            <p>Detalhes e estado atual do cliente selecionado.</p>
+        </div>
+        <a class="btn-secondary" href="{{ url_for('clientes') }}">Voltar</a>
+    </div>
+
+    <div class="page-section">
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Nome</h3>
+                <p>{{ client.nome }}</p>
+            </div>
+            <div class="info-card">
+                <h3>Email</h3>
+                <p>{{ client.email }}</p>
+            </div>
+            <div class="info-card">
+                <h3>Telefone</h3>
+                <p>{{ client.telefone }}</p>
+            </div>
+            <div class="info-card">
+                <h3>Role</h3>
+                <p>{{ client.role }}</p>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Documentos</h3>
+                {% for key, value in client.documentos.items() %}
+                <p>{{ key }}: {{ value }}</p>
+                {% endfor %}
+            </div>
+            <div class="info-card">
+                <h3>Viagem</h3>
+                {% if client.viagens %}
+                <p>{{ client.viagens[0].destino }} - {{ client.viagens[0].data }}</p>
+                <p>Status: {{ client.viagens[0].status }}</p>
+                {% else %}
+                <p>Sem viagens definidas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+</body>
+</html>

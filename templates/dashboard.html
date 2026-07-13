@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="page-shell">
+    <div class="page-box">
+
+        <div class="header-row">
+            <div>
+                <h1>🌍 <span class="brand-dark">NATUR</span><span class="brand-light">VIAGENS</span></h1>
+                <p>Gestão administrativa completa para clientes, viagens e documentos.</p>
+            </div>
+            <a class="btn-secondary" href="{{ url_for('logout') }}">Sair</a>
+        </div>
+
+        <div class="section-text">
+            <p>Escolha uma área para gerir. Aqui ficam os principais atalhos e relatórios do dia.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Clientes ativos</h3>
+                <strong>{{ stats.total_clients }}</strong>
+            </div>
+            <div class="stat-card">
+                <h3>Viagens agendadas</h3>
+                <strong>{{ stats.total_trips }}</strong>
+            </div>
+            <div class="stat-card">
+                <h3>Pagamentos pendentes</h3>
+                <strong>{{ stats.pending_payments }}</strong>
+            </div>
+            <div class="stat-card">
+                <h3>Documentos pendentes</h3>
+                <strong>{{ stats.documents_pending }}</strong>
+            </div>
+        </div>
+
+        <div class="nav-grid">
+            <a class="card-link" href="{{ url_for('clientes') }}">
+                <div class="card">
+                    <h2>👥 Clientes</h2>
+                    <p>Ver e selecionar clientes para detalhes rápidos.</p>
+                </div>
+            </a>
+            <a class="card-link" href="{{ url_for('documentos') }}">
+                <div class="card">
+                    <h2>📄 Documentos</h2>
+                    <p>Revisar atualizações e notificações automáticas.</p>
+                </div>
+            </a>
+            <a class="card-link" href="{{ url_for('pagamentos') }}">
+                <div class="card">
+                    <h2>💳 Pagamentos</h2>
+                    <p>Monitorizar faturas e estados de pagamento.</p>
+                </div>
+            </a>
+            <a class="card-link" href="{{ url_for('viagens') }}">
+                <div class="card">
+                    <h2>✈️ Viagens</h2>
+                    <p>Ver itinerários e confirmar pacotes.</p>
+                </div>
+            </a>
+            <a class="card-link" href="{{ url_for('hoteis') }}">
+                <div class="card">
+                    <h2>🏨 Hotéis</h2>
+                    <p>Checar reservas e alojamentos confirmados.</p>
+                </div>
+            </a>
+            <a class="card-link" href="{{ url_for('itinerario') }}">
+                <div class="card">
+                    <h2>🗺️ Itinerário</h2>
+                    <p>Planeamento completo da viagem do cliente.</p>
+                </div>
+            </a>
+            <a class="card-link" href="{{ url_for('restaurantes') }}">
+                <div class="card">
+                    <h2>🍽️ Restaurantes</h2>
+                    <p>Ver reservas gastronómicas e experiências locais.</p>
+                </div>
+            </a>
+            <a class="card-link admin-card" href="{{ url_for('relatorios') }}">
+                <div class="card">
+                    <h2>📊 Relatórios</h2>
+                    <p>Dados de performance e métricas de vendas.</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+</body>
+</html>

@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrar | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="hero-shell">
+    <div class="hero-grid">
+        <div class="hero-copy">
+            <h1>Bem-vindo à NaturViagens</h1>
+            <p>Descubra rotas, organize reservas e acompanhe cada etapa da sua viagem com confiança.</p>
+
+            <div class="hero-image"></div>
+
+            <div class="hero-features">
+                <div class="hero-feature">
+                    <span>✈️</span>
+                    <div>
+                        <strong>Reservas na palma da mão</strong>
+                        <p>Tenha todo o seu pacote de viagem organizado.</p>
+                    </div>
+                </div>
+                <div class="hero-feature">
+                    <span>🧳</span>
+                    <div>
+                        <strong>Pacotes personalizados</strong>
+                        <p>Hotéis, voos e atividades em um só lugar.</p>
+                    </div>
+                </div>
+                <div class="hero-feature">
+                    <span>📄</span>
+                    <div>
+                        <strong>Documentos e vouchers</strong>
+                        <p>Atualize estado e receba notificações automáticas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <a class="hero-action" href="{{ url_for('registrar') }}">Criar conta</a>
+        </div>
+
+        <div class="login-box">
+            <div class="brand">
+                <h1>🌍 <span class="brand-dark">NATUR</span><span class="brand-light">VIAGENS</span></h1>
+                <p>Login exclusivo para clientes e equipa administrativa.</p>
+            </div>
+
+            {% if error %}
+            <div class="alert-box error">{{ error }}</div>
+            {% endif %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert-box {{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('entrar') }}" method="POST">
+                <input type="text" name="identifier" placeholder="Email, telefone ou nome" required>
+                <div class="field-with-action">
+                    <input id="login-password" type="password" name="password" placeholder="Palavra-passe" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword('login-password', this)" aria-label="Mostrar senha">
+                        <span class="eye-icon crossed"></span>
+                    </button>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+
+            <p class="small-text">Ainda não tem conta? <a href="{{ url_for('registrar') }}">Registre-se</a></p>
+        </div>
+    </div>
+</div>
+
+<a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+    <script>
+        function togglePassword(fieldId, button) {
+            const input = document.getElementById(fieldId);
+            const icon = button.querySelector('.eye-icon');
+            if (!input || !icon) return;
+            const showing = input.type === 'text';
+            input.type = showing ? 'password' : 'text';
+            button.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
+            icon.classList.toggle('crossed', !showing);
+        }
+    </script>
+</html>

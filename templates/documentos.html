@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Documentos | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="page-box">
+    <div class="header-row">
+        <div>
+            <h1>📄 Documentos</h1>
+            <p>Atualize o estado dos documentos e receba notificação automática.</p>
+        </div>
+        <a class="btn-secondary" href="{{ url_for('dashboard') if user.role == 'admin' else url_for('area_cliente') }}">Voltar</a>
+    </div>
+
+    {% if message %}
+    <div class="info-card" style="background: rgba(78, 161, 255, 0.12); border-color: rgba(78, 161, 255, 0.2);">
+        <p>{{ message }}</p>
+    </div>
+    {% endif %}
+
+    <form action="{{ url_for('documentos') }}" method="POST">
+        <div class="info-grid">
+            {% for key, value in user.documentos.items() %}
+            <div class="info-card">
+                <h3>{{ key }}</h3>
+                <textarea name="{{ key }}" rows="3">{{ value }}</textarea>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit">Guardar Documentos</button>
+    </form>
+
+    <div class="section-text">
+        <p>Ao atualizar um documento, será enviada notificação para <a class="contact-link" href="mailto:davidmarcio455@gmail.com" target="_blank" rel="noopener noreferrer">o email de suporte</a> e também para a equipa interna da NaturViagens.</p>
+        <p>Precisa de suporte? Envie mensagem para <a class="contact-link" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank">WhatsApp +351 930 665 346</a> ou ligue para <strong>255 098 600</strong>.</p>
+    </div>
+</div>
+<a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+</body>
+</html>

@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatórios | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="page-box">
+    <div class="header-row">
+        <div>
+            <h1>📊 Relatórios</h1>
+            <p>Resumo administrativo e performance de vendas.</p>
+        </div>
+        <a class="btn-secondary" href="{{ url_for('dashboard') }}">Voltar</a>
+    </div>
+    <div class="page-section">
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Vendas</h3>
+                <p>Rendimento mensal: 12.560</p>
+            </div>
+            <div class="info-card">
+                <h3>Clientes</h3>
+                <p>Clientes ativos: 42</p>
+            </div>
+            <div class="info-card">
+                <h3>Reservas</h3>
+                <p>Reservas pendentes: 5</p>
+            </div>
+        </div>
+    </div>
+</div>
+<a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+</body>
+</html>

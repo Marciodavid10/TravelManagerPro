@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Área do Cliente | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="wrap">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Área do Cliente</h3>
+            <p class="text-muted">Aceda rapidamente aos seus documentos, viagens e apoio dedicado.</p>
+        </div>
+        <a class="btn-outline-light btn-sm" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+
+    <div class="info-grid mb-3">
+        <div class="info-card">
+            <h3>Bem-vindo, {{ user.nome }}</h3>
+            <p>Veja o estado atual dos seus próximos serviços e contacte a agência em qualquer momento.</p>
+        </div>
+        <div class="info-card">
+            <h3>Próxima viagem</h3>
+            {% if user.viagens %}
+            <p>{{ user.viagens[0].destino }} – {{ user.viagens[0].data }}</p>
+            <p>Status: {{ user.viagens[0].status }}</p>
+            {% else %}
+            <p>Sem viagens registadas.</p>
+            {% endif %}
+        </div>
+        <div class="info-card">
+            <h3>Hotel</h3>
+            {% if user.hoteis %}
+            <p>{{ user.hoteis[0].hotel }}</p>
+            <p>Check-in: {{ user.hoteis[0].checkin }}</p>
+            <p>{{ user.hoteis[0].status }}</p>
+            {% else %}
+            <p>Sem reservas de hotel.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="nav-grid">
+        <a class="card-link" href="{{ url_for('viagens') }}"><div class="card"><h2>✈️ Viagens</h2><p>Ver reserva e estado.</p></div></a>
+        <a class="card-link" href="{{ url_for('hoteis') }}"><div class="card"><h2>🏨 Hotéis</h2><p>Detalhes de alojamento.</p></div></a>
+        <a class="card-link" href="{{ url_for('documentos') }}"><div class="card"><h2>📄 Documentos</h2><p>Atualize os seus documentos.</p></div></a>
+        <a class="card-link" href="{{ url_for('pagamentos') }}"><div class="card"><h2>💳 Pagamentos</h2><p>Ver faturas e status.</p></div></a>
+        <a class="card-link" href="{{ url_for('itinerario') }}"><div class="card"><h2>🗺️ Itinerário</h2><p>Confira o roteiro completo.</p></div></a>
+        <a class="card-link" href="{{ url_for('restaurantes') }}"><div class="card"><h2>🍽️ Restaurantes</h2><p>Consultar reservas.</p></div></a>
+    </div>
+
+    <section class="card-dark mt-3">
+        <h5>Suporte imediato</h5>
+        <p>Precisa de apoio? Contacte-nos diretamente por WhatsApp ou email.</p>
+        <p class="contact-icon">📲 <a class="contact-link" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank">WhatsApp</a></p>
+        <p class="contact-icon">✉️ <a class="contact-link" href="mailto:davidmarcio455@gmail.com">Enviar email</a></p>
+    </section>
+</div>
+
+<a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+
+</body>
+</html>

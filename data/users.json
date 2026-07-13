@@ -1,0 +1,104 @@
+[
+  {
+    "id": 1,
+    "nome": "Administrador",
+    "email": "admin@naturviagens.pt",
+    "telefone": "",
+    "password": "1234",
+    "role": "admin",
+    "documentos": {
+      "Passaporte": "Pendente",
+      "Seguro de viagem": "Pendente",
+      "Voucher": "Pendente"
+    },
+    "viagens": [
+      {
+        "destino": "Lisboa",
+        "data": "15/05/2026",
+        "status": "Confirmada"
+      }
+    ],
+    "hoteis": [
+      {
+        "hotel": "Algarve Beach",
+        "checkin": "15/05/2026",
+        "status": "Confirmado"
+      }
+    ],
+    "pagamentos": [
+      {
+        "descricao": "Pacote viagem",
+        "valor": "750",
+        "status": "Pago"
+      },
+      {
+        "descricao": "Depósito final",
+        "valor": "250",
+        "status": "Pendente"
+      }
+    ],
+    "itinerario": [
+      "Dia 1: City tour e receção.",
+      "Dia 2: Praia e experiências locais.",
+      "Dia 3: Passeio cultural e descanso."
+    ],
+    "restaurantes": [
+      {
+        "local": "Mar Azul",
+        "data": "16/05/2026",
+        "status": "Confirmado"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "nome": "Márcio David",
+    "email": "davidmarcio455@gmail.com",
+    "telefone": "947208446",
+    "password": "12345",
+    "role": "client",
+    "documentos": {
+      "Passaporte": "Pendente",
+      "Seguro de viagem": "Pendente",
+      "Voucher": "Pendente"
+    },
+    "viagens": [
+      {
+        "destino": "Lisboa",
+        "data": "15/05/2026",
+        "status": "Confirmada"
+      }
+    ],
+    "hoteis": [
+      {
+        "hotel": "Algarve Beach",
+        "checkin": "15/05/2026",
+        "status": "Confirmado"
+      }
+    ],
+    "pagamentos": [
+      {
+        "descricao": "Pacote viagem",
+        "valor": "750",
+        "status": "Pago"
+      },
+      {
+        "descricao": "Depósito final",
+        "valor": "250",
+        "status": "Pendente"
+      }
+    ],
+    "itinerario": [
+      "Dia 1: City tour e receção.",
+      "Dia 2: Praia e experiências locais.",
+      "Dia 3: Passeio cultural e descanso."
+    ],
+    "restaurantes": [
+      {
+        "local": "Mar Azul",
+        "data": "16/05/2026",
+        "status": "Confirmado"
+      }
+    ]
+  }
+]

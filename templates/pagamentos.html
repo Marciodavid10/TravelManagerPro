@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Pagamentos | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="page-box">
+    <div class="header-row">
+        <div>
+            <h1>💳 Pagamentos</h1>
+            <p>Controle financeiro do cliente.</p>
+        </div>
+        <a class="btn-secondary" href="{{ url_for('dashboard') if user.role == 'admin' else url_for('area_cliente') }}">Voltar</a>
+    </div>
+    <div class="page-section">
+        <table class="data-table">
+            <tr><th>Descrição</th><th>Valor</th><th>Status</th></tr>
+            <tr><td>Pacote viagem</td><td>750</td><td>Pago</td></tr>
+            <tr><td>Depósito final</td><td>250</td><td>Pendente</td></tr>
+        </table>
+    </div>
+</div>
+<a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+</body>
+</html>
