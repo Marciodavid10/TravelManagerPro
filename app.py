@@ -288,15 +288,20 @@ def clientes():
     if user["role"] != "admin":
         return redirect(url_for("login"))
 
-    db = conectar()
-    cursor = db.cursor(dictionary=True)
+    try:
+        db = conectar()
+        cursor = db.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM clientes")
+        cursor.execute("SELECT * FROM clientes")
 
-    clients = cursor.fetchall()
+        clients = cursor.fetchall()
 
-    cursor.close()
-    db.close()
+        cursor.close()
+        db.close()
+
+    except Exception as e:
+        print("Erro MySQL:", e)
+        clients = []
 
     return render_template(
         "clientes.html",
