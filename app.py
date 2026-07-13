@@ -171,7 +171,7 @@ def login_required(view):
 
 
 @app.route("/")
-@app.route("/login")
+@app.route("/login", methods=["GET","POST"])
 def login():
     user = current_user()
     if user is not None:
@@ -313,7 +313,7 @@ def novo_cliente():
         cursor.execute("""
         INSERT INTO clientes
         (nome,email,telefone,passaporte)
-        VALUES (?,?,?,?)
+        VALUES (%s,%s,%s,%s)
         """,
         (nome,email,telefone,passaporte))
 
