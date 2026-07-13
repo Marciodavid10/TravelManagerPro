@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin - Viagens | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="page-box">
+    <div class="header-row">
+        <div>
+            <h1>Viagens (Admin)</h1>
+            <p class="section-text">Gerir viagens dos clientes.</p>
+        </div>
+        <div>
+            <a class="btn-secondary" href="{{ url_for('dashboard') }}">Voltar</a>
+            <a class="hero-action" href="{{ url_for('admin_viagem_novo') }}">Nova Viagem</a>
+        </div>
+    </div>
+
+    <div class="page-section">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Destino</th>
+                    <th>Início</th>
+                    <th>Fim</th>
+                    <th>Cliente</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for v in viagens %}
+                <tr>
+                    <td>{{ v.id }}</td>
+                    <td>{{ v.destino }}</td>
+                    <td>{{ v.data_inicio }}</td>
+                    <td>{{ v.data_fim or '-' }}</td>
+                    <td>{{ v.cliente_nome or v.cliente_id }}</td>
+                    <td>
+                        <a class="btn-sm btn-outline-light" href="{{ url_for('admin_viagem_editar', viagem_id=v.id) }}">Editar</a>
+                        <form style="display:inline" method="POST" action="{{ url_for('admin_viagem_delete', viagem_id=v.id) }}" onsubmit="return confirm('Apagar viagem?');">
+                            <button class="btn-sm btn-outline-light" type="submit">Apagar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6">Nenhuma viagem encontrada.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

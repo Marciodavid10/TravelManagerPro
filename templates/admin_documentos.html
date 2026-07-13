@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Documentos</h2>
+  <p><a class="btn" href="{{ url_for('admin_documento_novo') }}">Novo Documento</a></p>
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Nome</th><th>Cliente</th><th>Ficheiro</th><th>Ações</th></tr>
+    </thead>
+    <tbody>
+      {% for d in documentos %}
+      <tr>
+        <td>{{ d.id }}</td>
+        <td>{{ d.nome }}</td>
+        <td>{{ d.cliente_nome or '—' }}</td>
+        <td>
+          {% if d.ficheiro %}
+            <a href="{{ url_for('admin_documento_download', doc_id=d.id) }}">{{ d.ficheiro }}</a>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('admin_documento_delete', doc_id=d.id) }}" style="display:inline" onsubmit="return confirm('Apagar documento?')">
+            <button class="btn btn-danger" type="submit">Apagar</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

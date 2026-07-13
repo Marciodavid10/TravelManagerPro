@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Viagem | NaturViagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="page-box">
+    <div class="header-row">
+        <div>
+            <h1>{{ 'Editar Viagem' if viagem else 'Nova Viagem' }}</h1>
+            <p class="section-text">Preencha os dados da viagem.</p>
+        </div>
+        <a class="btn-secondary" href="{{ url_for('admin_viagens') }}">Voltar</a>
+    </div>
+
+    <div class="page-section">
+        {% if error %}
+            <div class="alert-box error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" class="form-grid">
+            <div class="form-group">
+                <label for="destino">Destino</label>
+                <input id="destino" name="destino" value="{{ viagem.destino if viagem else destino|default('') }}" required>
+            </div>
+            <div class="form-group">
+                <label for="data_inicio">Data início</label>
+                <input id="data_inicio" name="data_inicio" value="{{ viagem.data_inicio if viagem else data_inicio|default('') }}" placeholder="DD/MM/AAAA" required>
+            </div>
+            <div class="form-group">
+                <label for="data_fim">Data fim</label>
+                <input id="data_fim" name="data_fim" value="{{ viagem.data_fim if viagem else data_fim|default('') }}" placeholder="DD/MM/AAAA">
+            </div>
+            <div class="form-group">
+                <label for="cliente_id">Cliente</label>
+                <select id="cliente_id" name="cliente_id" required>
+                    <option value="">-- Selecionar cliente --</option>
+                    {% for c in clients %}
+                        <option value="{{ c.id }}" {% if viagem and viagem.cliente_id == c.id %}selected{% elif cliente_id and cliente_id == c.id|string %}selected{% endif %}>{{ c.nome }} ({{ c.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button class="hero-action" type="submit">Guardar</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

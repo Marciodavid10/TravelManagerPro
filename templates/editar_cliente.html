@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Editar Cliente | NaturViagens</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="page-shell">
+
+    <div class="page-box">
+
+        <h2>Editar Cliente</h2>
+
+
+        <form method="POST">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Nome</label>
+                    <input 
+                    type="text" 
+                    name="nome" 
+                    value="{{ cliente.nome }}"
+                    required>
+                </div>
+
+
+                <div>
+                    <label>Email</label>
+                    <input 
+                    type="email" 
+                    name="email" 
+                    value="{{ cliente.email }}">
+                </div>
+
+
+                <div>
+                    <label>Telefone</label>
+                    <input 
+                    type="text" 
+                    name="telefone" 
+                    value="{{ cliente.telefone }}">
+                </div>
+
+
+                <div>
+                    <label>Passaporte</label>
+                    <input 
+                    type="text" 
+                    name="passaporte" 
+                    value="{{ cliente.passaporte }}">
+                </div>
+
+            </div>
+
+
+            <button type="submit">
+                Guardar Alterações
+            </button>
+
+        </form>
+
+
+    </div>
+
+</div>
+
+</body>
+</html>

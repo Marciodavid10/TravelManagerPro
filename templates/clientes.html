@@ -37,7 +37,15 @@
             <td>{{ cliente.nome }}</td>
             <td>{{ cliente.email }}</td>
             <td>{{ cliente.telefone }}</td>
-            <td><a class="link-button" href="{{ url_for('cliente_detalhes', client_id=cliente.id) }}">Ver cliente</a></td>
+           <td>
+    <a class="link-button" href="{{ url_for('cliente_detalhes', client_id=cliente.id) }}">
+        Ver cliente
+    </a>
+
+    <a class="link-button" href="{{ url_for('editar_cliente', client_id=cliente.id) }}">
+    Editar
+</a>
+</td>
         </tr>
         {% endfor %}
     </table>

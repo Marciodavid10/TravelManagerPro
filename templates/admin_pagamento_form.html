@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>{% if pagamento %}Editar{% else %}Novo{% endif %} Pagamento</h2>
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+  <form method="post">
+    <div class="form-group">
+      <label>Cliente</label>
+      <select name="cliente_id" class="form-control">
+        <option value="">-- selecione --</option>
+        {% for c in clients %}
+          <option value="{{ c.id }}" {% if pagamento and pagamento.cliente_id == c.id %}selected{% elif c.id|string == cliente_id|string %}selected{% endif %}>{{ c.nome }} ({{ c.email }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Valor</label>
+      <input class="form-control" name="valor" value="{{ pagamento.valor or valor or '' }}" />
+    </div>
+    <div class="form-group">
+      <label>Estado</label>
+      <select name="estado" class="form-control">
+        {% set st = pagamento.estado if pagamento else estado if estado else 'Pendente' %}
+        <option value="Pendente" {% if st=='Pendente' %}selected{% endif %}>Pendente</option>
+        <option value="Pago" {% if st=='Pago' %}selected{% endif %}>Pago</option>
+        <option value="Cancelado" {% if st=='Cancelado' %}selected{% endif %}>Cancelado</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn" href="{{ url_for('admin_pagamentos') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

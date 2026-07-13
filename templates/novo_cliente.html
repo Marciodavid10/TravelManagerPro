@@ -1,177 +1,67 @@
 ﻿<!DOCTYPE html>
 <html lang="pt">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Novo Cliente | NaturViagens</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Cliente | NaturViagens</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        body {
-            background: linear-gradient(135deg, #08101f 0%, #08131c 100%);
-            color: #f8fafc;
-            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .page-shell {
-            max-width: 760px;
-            margin: 0 auto;
-            padding: 28px;
-            background: rgba(5, 10, 20, 0.94);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 28px;
-            box-shadow: 0 24px 70px rgba(0,0,0,0.35);
-        }
-        .page-box {
-            padding: 0;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-        }
-        .header-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        h1 {
-            margin: 0;
-            font-size: 2rem;
-            color: #f7f1d1;
-        }
-        .section-text {
-            margin: 8px 0 0;
-            color: #94a3b8;
-        }
-        .form-grid {
-            display: grid;
-            gap: 18px;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .form-group label {
-            color: #d6d6db;
-            font-weight: 700;
-            font-size: 0.95rem;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.16);
-            background: rgba(255,255,255,0.05);
-            color: #f8fafc;
-            outline: none;
-        }
-        .form-group input::placeholder {
-            color: rgba(255,255,255,0.55);
-        }
-        .hero-action,
-        .btn-secondary {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 24px;
-            border-radius: 14px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
-        }
-        .hero-action {
-            width: 100%;
-            background: #4ea1ff;
-            color: #fff;
-        }
-        .hero-action:hover,
-        .btn-secondary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 16px 34px rgba(0,0,0,.24);
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.08);
-            color: #f8fafc;
-            text-decoration: none;
-        }
-        .alert-box {
-            padding: 16px 18px;
-            border-radius: 16px;
-            border: 1px solid transparent;
-            margin-bottom: 18px;
-        }
-        .alert-box.success {
-            background: rgba(56, 189, 96, 0.13);
-            border-color: rgba(56, 189, 96, 0.25);
-            color: #b7f2c9;
-        }
-        .alert-box.error {
-            background: rgba(248, 113, 113, 0.12);
-            border-color: rgba(248, 113, 113, 0.28);
-            color: #f8c3c3;
-        }
-        @media (max-width: 640px) {
-            .header-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .hero-action,
-            .btn-secondary {
-                width: 100%;
-            }
-        }
-    </style>
 </head>
 
 <body>
-    <div class="page-shell">
-        <div class="page-box">
-            <div class="header-row">
-                <div>
-                    <h1>Criar Cliente</h1>
-                    <p class="section-text">Adicione um cliente novo ao sistema com dados completos.</p>
-                </div>
-                <a class="btn-secondary" href="{{ url_for('clientes') }}">Voltar</a>
-            </div>
 
-            {% if error %}
-            <div class="alert-box error">{{ error }}</div>
-            {% endif %}
-            {% if success %}
-            <div class="alert-box success">{{ success }}</div>
-            {% endif %}
+<div class="page-shell">
 
-            <form method="POST" class="form-grid">
-                <div class="form-group">
-                    <label for="nome">Nome</label>
-                    <input id="nome" type="text" name="nome" placeholder="Ex: João Silva" value="{{ nome | default('') }}" required>
-                </div>
+    <div class="page-box">
 
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input id="email" type="email" name="email" placeholder="exemplo@cliente.com" value="{{ email | default('') }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="telefone">Telefone</label>
-                    <input id="telefone" type="tel" name="telefone" placeholder="Ex: +351 912 345 678" value="{{ telefone | default('') }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="passaporte">Passaporte</label>
-                    <input id="passaporte" type="text" name="passaporte" placeholder="Número do passaporte" value="{{ passaporte | default('') }}" required>
-                </div>
-
-                <button type="submit" class="hero-action">Guardar Cliente</button>
-            </form>
+        <div class="header-row">
+            <h2>Criar Novo Cliente</h2>
         </div>
-    </div>
-</body>
 
+
+        <div class="page-section">
+
+            <form method="POST">
+
+                <div class="form-grid">
+
+                    <div>
+                        <label>Nome</label>
+                        <input type="text" name="nome" required>
+                    </div>
+
+
+                    <div>
+                        <label>Email</label>
+                        <input type="email" name="email">
+                    </div>
+
+
+                    <div>
+                        <label>Telefone</label>
+                        <input type="text" name="telefone">
+                    </div>
+
+
+                    <div>
+                        <label>Passaporte</label>
+                        <input type="text" name="passaporte">
+                    </div>
+
+                </div>
+
+
+                <button type="submit">
+                    Guardar Cliente
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
 </html>

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Pagamentos</h2>
+  <p><a class="btn" href="{{ url_for('admin_pagamento_novo') }}">Novo Pagamento</a></p>
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Cliente</th><th>Valor</th><th>Estado</th><th>Ações</th></tr>
+    </thead>
+    <tbody>
+      {% for p in pagamentos %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td>{{ p.cliente_nome or '—' }}</td>
+        <td>{{ p.valor }}</td>
+        <td>{{ p.estado }}</td>
+        <td>
+          <a class="btn" href="{{ url_for('admin_pagamento_editar', pag_id=p.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('admin_pagamento_delete', pag_id=p.id) }}" style="display:inline" onsubmit="return confirm('Apagar pagamento?')">
+            <button class="btn btn-danger" type="submit">Apagar</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
