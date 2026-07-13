@@ -305,9 +305,17 @@ def novo_cliente():
         passaporte = request.form.get("passaporte", "").strip()
 
         if not nome or not email or not telefone or not passaporte:
-            return render_template("novo_cliente.html", error="Por favor preencha todos os campos.")
+            return render_template(
+                "novo_cliente.html",
+                error="Por favor preencha todos os campos.",
+                nome=nome,
+                email=email,
+                telefone=telefone,
+                passaporte=passaporte,
+            )
 
         try:
+            print("Novo cliente enviado:", nome, email, telefone, passaporte)
             db = conectar()
             cursor = db.cursor()
             cursor.execute("""
@@ -317,11 +325,16 @@ def novo_cliente():
             """,
             (nome, email, telefone, passaporte))
             db.commit()
+            cursor.close()
         except Exception as exc:
             print("Erro ao guardar cliente:", exc)
             return render_template(
                 "novo_cliente.html",
                 error="Não foi possível guardar o cliente. Verifique a base de dados e tente novamente.",
+                nome=nome,
+                email=email,
+                telefone=telefone,
+                passaporte=passaporte,
             )
         finally:
             try:

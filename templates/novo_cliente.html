@@ -150,22 +150,22 @@
             <form method="POST" class="form-grid">
                 <div class="form-group">
                     <label for="nome">Nome</label>
-                    <input id="nome" type="text" name="nome" placeholder="Ex: João Silva" required>
+                    <input id="nome" type="text" name="nome" placeholder="Ex: João Silva" value="{{ nome | default('') }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input id="email" type="email" name="email" placeholder="exemplo@cliente.com" required>
+                    <input id="email" type="email" name="email" placeholder="exemplo@cliente.com" value="{{ email | default('') }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="telefone">Telefone</label>
-                    <input id="telefone" type="tel" name="telefone" placeholder="Ex: +351 912 345 678" required>
+                    <input id="telefone" type="tel" name="telefone" placeholder="Ex: +351 912 345 678" value="{{ telefone | default('') }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="passaporte">Passaporte</label>
-                    <input id="passaporte" type="text" name="passaporte" placeholder="Número do passaporte" required>
+                    <input id="passaporte" type="text" name="passaporte" placeholder="Número do passaporte" value="{{ passaporte | default('') }}" required>
                 </div>
 
                 <button type="submit" class="hero-action">Guardar Cliente</button>
