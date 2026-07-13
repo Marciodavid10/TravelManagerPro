@@ -16,45 +16,175 @@
         <a class="btn-secondary" href="{{ url_for('clientes') }}">Voltar</a>
     </div>
 
-    <div class="page-section">
+        <div class="page-section">
         <div class="info-grid">
             <div class="info-card">
                 <h3>Nome</h3>
-                <p>{{ client.nome }}</p>
+                                <p>{{ client.nome }}</p>
             </div>
             <div class="info-card">
                 <h3>Email</h3>
-                <p>{{ client.email }}</p>
+                                <p>{{ client.email }}</p>
             </div>
             <div class="info-card">
                 <h3>Telefone</h3>
-                <p>{{ client.telefone }}</p>
+                                <p>{{ client.telefone }}</p>
             </div>
             <div class="info-card">
                 <h3>Role</h3>
-                <p>{{ client.role }}</p>
+                                <p>{{ client.role if client.role is defined else 'client' }}</p>
             </div>
         </div>
+                <div class="info-grid">
+                        <div class="info-card">
+                                <h3>Documentos</h3>
+                                {% if documentos is defined and documentos %}
+                                    {% for d in documentos %}
+                                        <p>{{ d.nome }} {% if d.ficheiro %}- <a href="{{ url_for('admin_documento_download', doc_id=d.id) }}">{{ d.ficheiro }}</a>{% endif %}</p>
+                                    {% endfor %}
+                                {% elif client.documentos is defined %}
+                                    {% for key, value in client.documentos.items() %}
+                                        <p>{{ key }}: {{ value }}</p>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>Sem documentos registados.</p>
+                                {% endif %}
+                        </div>
+                        <div class="info-card">
+                                <h3>Viagens</h3>
+                                {% if viagens is defined and viagens %}
+                                    {% for v in viagens[:3] %}
+                                        <p>{{ v.destino }} - {{ v.data_inicio }} to {{ v.data_fim }}</p>
+                                    {% endfor %}
+                                {% elif client.viagens is defined %}
+                                    {% for v in client.viagens[:3] %}
+                                        <p>{{ v.destino }} - {{ v.data }}</p>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>Sem viagens definidas.</p>
+                                {% endif %}
+                                <p><a class="btn" href="{{ url_for('admin_viagens') }}">Gerir Viagens</a></p>
+                        </div>
+                </div>
+                <div class="info-grid">
+                        <div class="info-card">
+                                <h3>Pagamentos</h3>
+                                {% if pagamentos is defined and pagamentos %}
+                                    <ul>
+                                    {% for p in pagamentos %}
+                                        <li id="pag-{{ p.id }}">{{ p.valor }} - {{ p.estado }}
+                                            <button class="btn-small" onclick="editPagamento({{ p.id }}, '{{ p.valor }}', '{{ p.estado }}')">Editar</button>
+                                            <button class="btn-small danger" onclick="deletePagamento({{ p.id }})">Apagar</button>
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
+                                {% elif client.pagamentos is defined %}
+                                    {% for p in client.pagamentos %}
+                                        <p>{{ p.descricao }} - {{ p.valor }} - {{ p.status }}</p>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>Sem pagamentos registados.</p>
+                                {% endif %}
+                                <p><a class="btn" href="{{ url_for('admin_pagamentos') }}">Gerir Pagamentos</a></p>
+                        </div>
+                        <div class="info-card">
+                                <h3>Itinerários</h3>
+                                {% if itinerarios is defined and itinerarios %}
+                                    <ul>
+                                    {% for it in itinerarios %}
+                                        <li id="it-{{ it.id }}">{{ it.titulo }} - {{ it.data }}
+                                            <button class="btn-small" onclick="editItinerario({{ it.id }}, '{{ it.titulo|e }}', '{{ it.detalhes|e }}', '{{ it.data|e }}')">Editar</button>
+                                            <button class="btn-small danger" onclick="deleteItinerario({{ it.id }})">Apagar</button>
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
+                                {% elif client.itinerario is defined %}
+                                    {% for it in client.itinerario %}
+                                        <p>{{ it }}</p>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>Sem itinerários registados.</p>
+                                {% endif %}
+                                <p><a class="btn" href="{{ url_for('admin_itinerarios') }}">Gerir Itinerários</a></p>
+                        </div>
+                </div>
+                <div style="margin-top:16px">
+                    <a class="btn" href="{{ url_for('editar_cliente', client_id=client.id) }}">Editar Cliente</a>
+                    <a class="btn" href="{{ url_for('admin_documentos') }}">Gerir Documentos</a>
+                    <a class="btn" href="{{ url_for('admin_cliente_download_all_pdf', client_id=client.id) }}">Baixar tudo (PDF)</a>
+                </div>
 
-        <div class="info-grid">
-            <div class="info-card">
-                <h3>Documentos</h3>
-                {% for key, value in client.documentos.items() %}
-                <p>{{ key }}: {{ value }}</p>
-                {% endfor %}
-            </div>
-            <div class="info-card">
-                <h3>Viagem</h3>
-                {% if client.viagens %}
-                <p>{{ client.viagens[0].destino }} - {{ client.viagens[0].data }}</p>
-                <p>Status: {{ client.viagens[0].status }}</p>
-                {% else %}
-                <p>Sem viagens definidas.</p>
-                {% endif %}
-            </div>
-        </div>
+                <div class="page-section" style="margin-top:18px">
+                    <h3>Adicionar Pagamento (rápido)</h3>
+                    <form method="post" action="{{ url_for('admin_cliente_pagamento_quick_add', client_id=client.id) }}">
+                        <input name="valor" placeholder="Valor" />
+                        <select name="estado">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Pago">Pago</option>
+                        </select>
+                        <button class="btn" type="submit">Adicionar</button>
+                    </form>
+                </div>
+
+                <div class="page-section" style="margin-top:18px">
+                    <h3>Adicionar Itinerário (rápido)</h3>
+                    <form method="post" action="{{ url_for('admin_cliente_itinerario_quick_add', client_id=client.id) }}">
+                        <input name="titulo" placeholder="Título" />
+                        <input name="data" placeholder="Data" />
+                        <textarea name="detalhes" placeholder="Detalhes"></textarea>
+                        <button class="btn" type="submit">Adicionar</button>
+                    </form>
+                </div>
+
+                <div class="page-section" style="margin-top:18px">
+                    <h3>Upload Documento (rápido)</h3>
+                    <form method="post" action="{{ url_for('admin_documento_novo') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="cliente_id" value="{{ client.id }}" />
+                        <input type="hidden" name="next" value="{{ url_for('cliente_detalhes', client_id=client.id) }}" />
+                        <input type="text" name="nome" placeholder="Nome do documento" />
+                        <input type="file" name="ficheiro" />
+                        <button class="btn" type="submit">Upload</button>
+                    </form>
+                </div>
     </div>
 </div>
 <a class="whatsapp-float" href="https://wa.me/351930665346?text=Olá%20NaturViagens!" target="_blank" rel="noopener noreferrer" title="WhatsApp">📲</a>
+
+<script>
+async function postJSON(url, payload){
+    const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    return r.json();
+}
+
+function editPagamento(id, valor, estado){
+    const novo = prompt('Novo valor:', valor);
+    if(novo===null) return;
+    const novoEstado = prompt('Estado (Pendente/Pago):', estado);
+    if(novoEstado===null) return;
+    postJSON(`/admin/pagamentos/${id}/ajax_update`, {valor: novo, estado: novoEstado}).then(res=>{
+        if(res.ok) location.reload(); else alert('Erro: '+(res.error||'')); 
+    });
+}
+
+function deletePagamento(id){
+    if(!confirm('Apagar pagamento?')) return;
+    postJSON(`/admin/pagamentos/${id}/ajax_delete`, {}).then(res=>{ if(res.ok) document.getElementById('pag-'+id).remove(); else alert('Erro'); });
+}
+
+function editItinerario(id, titulo, detalhes, data){
+    const nt = prompt('Título:', titulo);
+    if(nt===null) return;
+    const nd = prompt('Detalhes:', detalhes);
+    if(nd===null) return;
+    const ndat = prompt('Data:', data);
+    if(ndat===null) return;
+    postJSON(`/admin/itinerarios/${id}/ajax_update`, {titulo: nt, detalhes: nd, data: ndat}).then(res=>{ if(res.ok) location.reload(); else alert('Erro: '+(res.error||'')); });
+}
+
+function deleteItinerario(id){
+    if(!confirm('Apagar itinerário?')) return;
+    postJSON(`/admin/itinerarios/${id}/ajax_delete`, {}).then(res=>{ if(res.ok) document.getElementById('it-'+id).remove(); else alert('Erro'); });
+}
+</script>
 </body>
 </html>

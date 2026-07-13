@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Itinerários</h2>
+  <p><a class="btn" href="{{ url_for('admin_itinerario_novo') }}">Novo Itinerário</a></p>
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Título</th><th>Data</th><th>Cliente</th><th>Ações</th></tr>
+    </thead>
+    <tbody>
+      {% for it in itens %}
+      <tr>
+        <td>{{ it.id }}</td>
+        <td>{{ it.titulo }}</td>
+        <td>{{ it.data }}</td>
+        <td>{{ it.cliente_nome or '—' }}</td>
+        <td>
+          <a class="btn" href="{{ url_for('admin_itinerario_editar', item_id=it.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('admin_itinerario_delete', item_id=it.id) }}" style="display:inline" onsubmit="return confirm('Apagar itinerário?')">
+            <button class="btn btn-danger" type="submit">Apagar</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

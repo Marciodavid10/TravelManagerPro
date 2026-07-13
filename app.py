@@ -1,4 +1,4 @@
-﻿from flask import Flask, render_template, request, redirect,redirect, url_for, session, flash
+﻿from flask import Flask, render_template, request, redirect,redirect, url_for, session, flash, send_file
 from pathlib import Path
 import json
 import smtplib
@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 import os
 import uuid
+import io
 
 app = Flask(__name__)
 app.secret_key = "naturviagens-secret-key"
@@ -257,34 +258,25 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
+
     user = current_user()
+
     if user["role"] != "admin":
         return redirect(url_for("login"))
 
-    clients = [u for u in load_users() if u["role"] == "client"]
-    total_clients = len(clients)
-    total_trips = sum(len(u.get("viagens", [])) for u in clients)
-    pending_payments = sum(
-        1
-        for u in clients
-        for payment in u.get("pagamentos", [])
-        if payment.get("status", "").lower() != "pago"
-    )
-    documents_pending = sum(
-        1
-        for u in clients
-        for status in u.get("documentos", {}).values()
-        if "pendente" in status.lower()
-    )
+    db = conectar()
+    cursor = db.cursor(dictionary=True)
 
-    stats = {
-        "total_clients": total_clients,
-        "total_trips": total_trips,
-        "pending_payments": pending_payments,
-        "documents_pending": documents_pending,
-    }
+    cursor.execute("SELECT * FROM clientes")
+    clients = cursor.fetchall()
 
-    return render_template("dashboard.html", user=user, stats=stats)
+    cursor.close()
+    db.close()
+
+    return render_template(
+        "dashboard.html",
+        clients=clients
+    )
 
 
 @app.route("/clientes")
@@ -297,16 +289,19 @@ def clientes():
         return redirect(url_for("login"))
 
     db = conectar()
-    cursor = db.cursor()
+    cursor = db.cursor(dictionary=True)
+
     cursor.execute("SELECT * FROM clientes")
+
     clients = cursor.fetchall()
-    clients = rows_to_dicts(cursor, clients)
+
     cursor.close()
-    try:
-        db.close()
-    except Exception:
-        pass
-    return render_template("clientes.html", clients=clients)
+    db.close()
+
+    return render_template(
+        "clientes.html",
+        clients=clients
+    )
 
 
 @app.route("/clientes/<int:client_id>")
@@ -315,10 +310,46 @@ def cliente_detalhes(client_id):
     user = current_user()
     if user["role"] != "admin":
         return redirect(url_for("login"))
-    client = get_client_by_id(client_id)
+
+    client = None
+    viagens = []
+    documentos = []
+    pagamentos = []
+    itinerarios = []
+
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, "SELECT * FROM clientes WHERE id=%s", (client_id,))
+        row = cursor.fetchone()
+        if row:
+            client = rows_to_dicts(cursor, [row])[0]
+
+        exec_db(cursor, db, "SELECT * FROM viagens WHERE cliente_id = %s ORDER BY id DESC", (client_id,))
+        viagens = rows_to_dicts(cursor, cursor.fetchall())
+
+        exec_db(cursor, db, "SELECT * FROM documentos WHERE cliente_id = %s ORDER BY id DESC", (client_id,))
+        documentos = rows_to_dicts(cursor, cursor.fetchall())
+
+        exec_db(cursor, db, "SELECT * FROM pagamentos WHERE cliente_id = %s ORDER BY id DESC", (client_id,))
+        pagamentos = rows_to_dicts(cursor, cursor.fetchall())
+
+        exec_db(cursor, db, "SELECT * FROM itinerarios WHERE cliente_id = %s ORDER BY id DESC", (client_id,))
+        itinerarios = rows_to_dicts(cursor, cursor.fetchall())
+
+        cursor.close()
+    except Exception as exc:
+        print("Erro ao buscar cliente/dados relacionados:", exc)
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
     if client is None:
         return redirect(url_for("clientes"))
-    return render_template("cliente_detalhes.html", client=client)
+
+    return render_template("cliente_detalhes.html", client=client, viagens=viagens, documentos=documentos, pagamentos=pagamentos, itinerarios=itinerarios)
 
 @app.route("/editar_cliente/<int:client_id>", methods=["GET","POST"])
 @login_required
@@ -677,6 +708,11 @@ def admin_documento_novo():
             except Exception:
                 pass
 
+        # redirect to provided 'next' if present (e.g., return to cliente_detalhes)
+        next_url = request.form.get('next') or request.args.get('next')
+        if next_url:
+            return redirect(next_url)
+
         return redirect(url_for("admin_documentos"))
 
     return render_template("admin_documento_form.html", clients=clients)
@@ -887,6 +923,459 @@ def admin_pagamento_delete(pag_id):
             pass
 
     return redirect(url_for("admin_pagamentos"))
+
+
+# --- Admin itinerario CRUD ---
+@app.route("/admin/itinerarios")
+@login_required
+def admin_itinerarios():
+    user = current_user()
+    if user is None or user.get("role") != "admin":
+        return redirect(url_for("login"))
+
+    itens = []
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        cursor.execute("SELECT it.id, it.titulo, it.detalhes, it.data, it.cliente_id, c.nome AS cliente_nome FROM itinerarios it LEFT JOIN clientes c ON it.cliente_id = c.id ORDER BY it.id DESC")
+        itens = cursor.fetchall()
+        itens = rows_to_dicts(cursor, itens)
+        cursor.close()
+    except Exception as exc:
+        print("Erro a listar itinerarios:", exc)
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    return render_template("admin_itinerarios.html", itens=itens)
+
+
+@app.route("/admin/itinerarios/novo", methods=["GET", "POST"])
+@login_required
+def admin_itinerario_novo():
+    user = current_user()
+    if user is None or user.get("role") != "admin":
+        return redirect(url_for("login"))
+
+    clients = fetch_db_clients()
+
+    if request.method == "POST":
+        titulo = request.form.get("titulo", "").strip()
+        detalhes = request.form.get("detalhes", "").strip()
+        data_field = request.form.get("data", "").strip()
+        cliente_id = request.form.get("cliente_id") or None
+
+        if not titulo or not cliente_id:
+            return render_template("admin_itinerario_form.html", error="Preencha os campos obrigatórios.", clients=clients, titulo=titulo, detalhes=detalhes, data=data_field, cliente_id=cliente_id)
+
+        try:
+            db = conectar()
+            cursor = db.cursor()
+            exec_db(cursor, db, "INSERT INTO itinerarios (titulo, detalhes, data, cliente_id) VALUES (%s,%s,%s,%s)", (titulo, detalhes, data_field, cliente_id))
+            db.commit()
+            cursor.close()
+        except Exception as exc:
+            print("Erro ao criar itinerario:", exc)
+            return render_template("admin_itinerario_form.html", error="Erro ao guardar itinerario.", clients=clients, titulo=titulo, detalhes=detalhes, data=data_field, cliente_id=cliente_id)
+        finally:
+            try:
+                db.close()
+            except Exception:
+                pass
+
+        return redirect(url_for("admin_itinerarios"))
+
+    return render_template("admin_itinerario_form.html", clients=clients)
+
+
+@app.route("/admin/itinerarios/<int:item_id>/editar", methods=["GET", "POST"])
+@login_required
+def admin_itinerario_editar(item_id):
+    user = current_user()
+    if user is None or user.get("role") != "admin":
+        return redirect(url_for("login"))
+
+    clients = fetch_db_clients()
+    item = None
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, "SELECT * FROM itinerarios WHERE id = %s", (item_id,))
+        item = cursor.fetchone()
+        if item:
+            item = rows_to_dicts(cursor, [item])[0]
+        cursor.close()
+    except Exception as exc:
+        print("Erro ao buscar itinerario:", exc)
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    if item is None:
+        return redirect(url_for("admin_itinerarios"))
+
+    if request.method == "POST":
+        titulo = request.form.get("titulo", "").strip()
+        detalhes = request.form.get("detalhes", "").strip()
+        data_field = request.form.get("data", "").strip()
+        cliente_id = request.form.get("cliente_id") or None
+
+        if not titulo or not cliente_id:
+            return render_template("admin_itinerario_form.html", error="Preencha os campos obrigatórios.", clients=clients, item=item)
+
+        try:
+            db = conectar()
+            cursor = db.cursor()
+            exec_db(cursor, db, "UPDATE itinerarios SET titulo=%s, detalhes=%s, data=%s, cliente_id=%s WHERE id=%s", (titulo, detalhes, data_field, cliente_id, item_id))
+            db.commit()
+            cursor.close()
+        except Exception as exc:
+            print("Erro ao atualizar itinerario:", exc)
+            return render_template("admin_itinerario_form.html", error="Erro ao actualizar itinerario.", clients=clients, item=item)
+        finally:
+            try:
+                db.close()
+            except Exception:
+                pass
+
+        return redirect(url_for("admin_itinerarios"))
+
+    return render_template("admin_itinerario_form.html", clients=clients, item=item)
+
+
+@app.route("/admin/itinerarios/<int:item_id>/delete", methods=["POST"])
+@login_required
+def admin_itinerario_delete(item_id):
+    user = current_user()
+    if user is None or user.get("role") != "admin":
+        return redirect(url_for("login"))
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, "DELETE FROM itinerarios WHERE id = %s", (item_id,))
+        db.commit()
+        cursor.close()
+    except Exception as exc:
+        print("Erro ao apagar itinerario:", exc)
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    return redirect(url_for("admin_itinerarios"))
+
+
+@app.route('/admin/clientes/<int:client_id>/pagamentos/quick_add', methods=['POST'])
+@login_required
+def admin_cliente_pagamento_quick_add(client_id):
+    user = current_user()
+    if user is None or user.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    valor = request.form.get('valor') or '0'
+    estado = request.form.get('estado') or 'Pendente'
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, 'INSERT INTO pagamentos (valor, estado, cliente_id) VALUES (%s,%s,%s)', (valor, estado, client_id))
+        db.commit()
+        cursor.close()
+    except Exception as exc:
+        print('Erro ao adicionar pagamento rápido:', exc)
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    return redirect(url_for('cliente_detalhes', client_id=client_id))
+
+
+@app.route('/admin/clientes/<int:client_id>/itinerarios/quick_add', methods=['POST'])
+@login_required
+def admin_cliente_itinerario_quick_add(client_id):
+    user = current_user()
+    if user is None or user.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    titulo = request.form.get('titulo', '').strip()
+    detalhes = request.form.get('detalhes', '').strip()
+    data_field = request.form.get('data', '').strip()
+    if not titulo:
+        return redirect(url_for('cliente_detalhes', client_id=client_id))
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, 'INSERT INTO itinerarios (titulo, detalhes, data, cliente_id) VALUES (%s,%s,%s,%s)', (titulo, detalhes, data_field, client_id))
+        db.commit()
+        cursor.close()
+    except Exception as exc:
+        print('Erro ao adicionar itinerario rápido:', exc)
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    return redirect(url_for('cliente_detalhes', client_id=client_id))
+
+
+@app.route('/admin/pagamentos/<int:pag_id>/ajax_update', methods=['POST'])
+@login_required
+def admin_pagamento_ajax_update(pag_id):
+    user = current_user()
+    if user is None or user.get('role') != 'admin':
+        return {'ok': False, 'error': 'unauthorized'}, 403
+
+    data = request.get_json() or {}
+    valor = data.get('valor')
+    estado = data.get('estado')
+    # validate valor
+    try:
+        if valor is not None:
+            float(valor)
+    except Exception:
+        return {'ok': False, 'error': 'valor inválido'}, 400
+
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, 'UPDATE pagamentos SET valor=%s, estado=%s WHERE id=%s', (valor, estado, pag_id))
+        db.commit()
+        cursor.close()
+    except Exception as exc:
+        print('Erro ao actualizar pagamento ajax:', exc)
+        return {'ok': False, 'error': 'db error'}, 500
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    return {'ok': True}
+
+
+@app.route('/admin/pagamentos/<int:pag_id>/ajax_delete', methods=['POST'])
+@login_required
+def admin_pagamento_ajax_delete(pag_id):
+    user = current_user()
+    if user is None or user.get('role') != 'admin':
+        return {'ok': False, 'error': 'unauthorized'}, 403
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, 'DELETE FROM pagamentos WHERE id = %s', (pag_id,))
+        db.commit()
+        cursor.close()
+    except Exception as exc:
+        print('Erro ao apagar pagamento ajax:', exc)
+        return {'ok': False, 'error': 'db error'}, 500
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    return {'ok': True}
+
+
+@app.route('/admin/itinerarios/<int:item_id>/ajax_update', methods=['POST'])
+@login_required
+def admin_itinerario_ajax_update(item_id):
+    user = current_user()
+    if user is None or user.get('role') != 'admin':
+        return {'ok': False, 'error': 'unauthorized'}, 403
+    data = request.get_json() or {}
+    titulo = data.get('titulo', '').strip()
+    detalhes = data.get('detalhes', '').strip()
+    data_field = data.get('data', '').strip()
+    if not titulo:
+        return {'ok': False, 'error': 'titulo obrigatório'}, 400
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, 'UPDATE itinerarios SET titulo=%s, detalhes=%s, data=%s WHERE id=%s', (titulo, detalhes, data_field, item_id))
+        db.commit()
+        cursor.close()
+    except Exception as exc:
+        print('Erro ao actualizar itinerario ajax:', exc)
+        return {'ok': False, 'error': 'db error'}, 500
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    return {'ok': True}
+
+
+@app.route('/admin/itinerarios/<int:item_id>/ajax_delete', methods=['POST'])
+@login_required
+def admin_itinerario_ajax_delete(item_id):
+    user = current_user()
+    if user is None or user.get('role') != 'admin':
+        return {'ok': False, 'error': 'unauthorized'}, 403
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, 'DELETE FROM itinerarios WHERE id = %s', (item_id,))
+        db.commit()
+        cursor.close()
+    except Exception as exc:
+        print('Erro ao apagar itinerario ajax:', exc)
+        return {'ok': False, 'error': 'db error'}, 500
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    return {'ok': True}
+
+
+@app.route('/admin/clientes/<int:client_id>/download_all_pdf')
+@login_required
+def admin_cliente_download_all_pdf(client_id):
+    user = current_user()
+    if user is None or user.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    # fetch client and related data
+    client = None
+    viagens = []
+    documentos = []
+    pagamentos = []
+    itinerarios = []
+    try:
+        db = conectar()
+        cursor = db.cursor()
+        exec_db(cursor, db, 'SELECT * FROM clientes WHERE id=%s', (client_id,))
+        row = cursor.fetchone()
+        if row:
+            client = rows_to_dicts(cursor, [row])[0]
+
+        exec_db(cursor, db, 'SELECT * FROM viagens WHERE cliente_id = %s ORDER BY id DESC', (client_id,))
+        viagens = rows_to_dicts(cursor, cursor.fetchall())
+
+        exec_db(cursor, db, 'SELECT * FROM documentos WHERE cliente_id = %s ORDER BY id DESC', (client_id,))
+        documentos = rows_to_dicts(cursor, cursor.fetchall())
+
+        exec_db(cursor, db, 'SELECT * FROM pagamentos WHERE cliente_id = %s ORDER BY id DESC', (client_id,))
+        pagamentos = rows_to_dicts(cursor, cursor.fetchall())
+
+        exec_db(cursor, db, 'SELECT * FROM itinerarios WHERE cliente_id = %s ORDER BY id DESC', (client_id,))
+        itinerarios = rows_to_dicts(cursor, cursor.fetchall())
+
+        cursor.close()
+    except Exception as exc:
+        print('Erro ao gerar PDF, falha ao ler DB:', exc)
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
+    if client is None:
+        return redirect(url_for('clientes'))
+
+    # generate PDF in-memory using reportlab (install via pip install reportlab)
+    try:
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.pagesizes import A4
+    except Exception as exc:
+        print('reportlab não instalado:', exc)
+        return render_template('cliente_detalhes.html', client=client, viagens=viagens, documentos=documentos, pagamentos=pagamentos, itinerarios=itinerarios, error='Instale reportlab (pip install reportlab) para gerar PDFs.')
+
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    y = height - 40
+
+    def newline(space=14):
+        nonlocal y
+        y -= space
+        if y < 60:
+            c.showPage()
+            y = height - 40
+
+    c.setFont('Helvetica-Bold', 16)
+    c.drawString(40, y, f"Dados do Cliente: {client.get('nome','')} (ID: {client.get('id')})")
+    newline(20)
+
+    c.setFont('Helvetica', 11)
+    c.drawString(40, y, f"Email: {client.get('email','')}")
+    newline()
+    c.drawString(40, y, f"Telefone: {client.get('telefone','')}")
+    newline()
+    c.drawString(40, y, f"Passaporte: {client.get('passaporte','')}")
+    newline(18)
+
+    # Viagens
+    c.setFont('Helvetica-Bold', 13)
+    c.drawString(40, y, 'Viagens:')
+    newline(16)
+    c.setFont('Helvetica', 10)
+    if viagens:
+        for v in viagens:
+            c.drawString(48, y, f"- {v.get('destino','')} | {v.get('data_inicio','')} - {v.get('data_fim','')}")
+            newline(12)
+    else:
+        c.drawString(48, y, 'Nenhuma')
+        newline(12)
+
+    # Itinerarios
+    c.setFont('Helvetica-Bold', 13)
+    c.drawString(40, y, 'Itinerários:')
+    newline(16)
+    c.setFont('Helvetica', 10)
+    if itinerarios:
+        for it in itinerarios:
+            c.drawString(48, y, f"- {it.get('titulo','')} | {it.get('data','')}")
+            newline(12)
+            if it.get('detalhes'):
+                c.drawString(60, y, it.get('detalhes'))
+                newline(12)
+    else:
+        c.drawString(48, y, 'Nenhum')
+        newline(12)
+
+    # Pagamentos
+    c.setFont('Helvetica-Bold', 13)
+    c.drawString(40, y, 'Pagamentos:')
+    newline(16)
+    c.setFont('Helvetica', 10)
+    if pagamentos:
+        for p in pagamentos:
+            c.drawString(48, y, f"- {p.get('valor','')} | {p.get('estado','')}")
+            newline(12)
+    else:
+        c.drawString(48, y, 'Nenhum')
+        newline(12)
+
+    # Documentos
+    c.setFont('Helvetica-Bold', 13)
+    c.drawString(40, y, 'Documentos:')
+    newline(16)
+    c.setFont('Helvetica', 10)
+    if documentos:
+        for d in documentos:
+            c.drawString(48, y, f"- {d.get('nome','')} -> {d.get('ficheiro','')}")
+            newline(12)
+    else:
+        c.drawString(48, y, 'Nenhum')
+        newline(12)
+
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+
+    filename = f"{client.get('nome','cliente')}_dados.pdf".replace(' ', '_')
+    return send_file(buffer, mimetype='application/pdf', as_attachment=True, download_name=filename)
 
 
 @app.route("/documentos", methods=["GET", "POST"])

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>{% if item %}Editar{% else %}Novo{% endif %} Itinerário</h2>
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+  <form method="post">
+    <div class="form-group">
+      <label>Título</label>
+      <input class="form-control" name="titulo" value="{{ item.titulo if item else titulo or '' }}" />
+    </div>
+    <div class="form-group">
+      <label>Data</label>
+      <input class="form-control" name="data" value="{{ item.data if item else data or '' }}" />
+    </div>
+    <div class="form-group">
+      <label>Detalhes</label>
+      <textarea class="form-control" name="detalhes">{{ item.detalhes if item else detalhes or '' }}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Cliente</label>
+      <select name="cliente_id" class="form-control">
+        <option value="">-- selecione --</option>
+        {% for c in clients %}
+          <option value="{{ c.id }}" {% if item and item.cliente_id == c.id %}selected{% elif c.id|string == cliente_id|string %}selected{% endif %}>{{ c.nome }} ({{ c.email }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn" href="{{ url_for('admin_itinerarios') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
