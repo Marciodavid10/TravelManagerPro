@@ -298,32 +298,38 @@ def cliente_detalhes(client_id):
 
 @app.route("/novo_cliente", methods=["GET","POST"])
 def novo_cliente():
-
     if request.method == "POST":
+        nome = request.form.get("nome", "").strip()
+        email = request.form.get("email", "").strip()
+        telefone = request.form.get("telefone", "").strip()
+        passaporte = request.form.get("passaporte", "").strip()
 
-        nome = request.form["nome"]
-        email = request.form["email"]
-        telefone = request.form["telefone"]
-        passaporte = request.form["passaporte"]
+        if not nome or not email or not telefone or not passaporte:
+            return render_template("novo_cliente.html", error="Por favor preencha todos os campos.")
 
+        try:
+            db = conectar()
+            cursor = db.cursor()
+            cursor.execute("""
+            INSERT INTO clientes
+            (nome,email,telefone,passaporte)
+            VALUES (%s,%s,%s,%s)
+            """,
+            (nome, email, telefone, passaporte))
+            db.commit()
+        except Exception as exc:
+            print("Erro ao guardar cliente:", exc)
+            return render_template(
+                "novo_cliente.html",
+                error="Não foi possível guardar o cliente. Verifique a base de dados e tente novamente.",
+            )
+        finally:
+            try:
+                db.close()
+            except Exception:
+                pass
 
-        db = conectar()
-        cursor = db.cursor()
-
-        cursor.execute("""
-        INSERT INTO clientes
-        (nome,email,telefone,passaporte)
-        VALUES (%s,%s,%s,%s)
-        """,
-        (nome,email,telefone,passaporte))
-
-
-        db.commit()
-        db.close()
-
-
-        return redirect("/clientes")
-
+        return render_template("novo_cliente.html", success="Cliente criado com sucesso.")
 
     return render_template("novo_cliente.html")
 

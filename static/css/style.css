@@ -291,6 +291,28 @@ input{
     outline:none;
 }
 
+.form-grid{
+    display:grid;
+    gap:20px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.form-group label{
+    font-size:0.95rem;
+    font-weight:700;
+    color:#d6d6db;
+}
+
+form button.hero-action{
+    width: auto;
+    padding: 14px 24px;
+}
+
 .field-with-action{
     position:relative;
 }
