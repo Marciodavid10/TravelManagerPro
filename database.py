@@ -10,6 +10,9 @@ def conectar():
     Returns a DB connection object. If it's SQLite, the connection will have
     attribute `_is_sqlite = True` and `row_factory` set to sqlite3.Row.
     """
+    if not DB_HOST or not DB_USER or not DB_NAME:
+        return _fallback_to_sqlite()
+
     try:
         return mysql.connector.connect(
             host=DB_HOST,
