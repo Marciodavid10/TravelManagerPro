@@ -26,27 +26,15 @@ def _fallback_to_sqlite():
     conn._is_sqlite = True
     return conn
 
-
 def conectar():
-    """Try to connect to MySQL, fallback to a local SQLite DB for development.
-
-    Returns a DB connection object. If it's SQLite, the connection will have
-    attribute `_is_sqlite = True` and `row_factory` set to sqlite3.Row.
-    """
-    if not DB_HOST or not DB_USER or not DB_NAME:
-        return _fallback_to_sqlite()
-
-    try:
-        return mysql.connector.connect(
-            host=DB_HOST,
-            port=DB_PORT,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME,
-            connection_timeout=10,
-        )
-    except Exception:
-        return _fallback_to_sqlite()
+    return mysql.connector.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME,
+        connection_timeout=10
+    )
 
 
 def rows_to_dicts(cursor, rows):
