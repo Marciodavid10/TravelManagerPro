@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.log
+*.pot
+*.pyc
+
+# Virtual environment
+venv/
+
+# Dotenv
+.env
+
+data/local_dev.db

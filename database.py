@@ -1,7 +1,30 @@
 import mysql.connector
 import sqlite3
+import tempfile
 from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 from pathlib import Path
+
+
+class SqliteConnection(sqlite3.Connection):
+    """SQLite connection subclass that allows setting custom attributes."""
+    pass
+
+
+def _fallback_to_sqlite():
+    project_db_path = Path(__file__).resolve().parent / "data" / "local_dev.db"
+    try:
+        project_db_path.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(str(project_db_path), factory=SqliteConnection)
+    except Exception:
+        fallback_db_path = Path(tempfile.gettempdir()) / "travelmanagerpro_local_dev.db"
+        try:
+            conn = sqlite3.connect(str(fallback_db_path), factory=SqliteConnection)
+        except Exception:
+            conn = sqlite3.connect(":memory:", factory=SqliteConnection)
+
+    conn.row_factory = sqlite3.Row
+    conn._is_sqlite = True
+    return conn
 
 
 def conectar():
@@ -20,15 +43,10 @@ def conectar():
             user=DB_USER,
             password=DB_PASSWORD,
             database=DB_NAME,
+            connection_timeout=10,
         )
     except Exception:
-        # Fallback to SQLite local file in project data directory
-        db_path = Path(__file__).resolve().parent / "data" / "local_dev.db"
-        db_path.parent.mkdir(exist_ok=True)
-        conn = sqlite3.connect(str(db_path))
-        conn.row_factory = sqlite3.Row
-        conn._is_sqlite = True
-        return conn
+        return _fallback_to_sqlite()
 
 
 def rows_to_dicts(cursor, rows):
