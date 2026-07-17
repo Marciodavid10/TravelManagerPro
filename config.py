@@ -13,9 +13,9 @@ def _int_env(name, default):
     except (TypeError, ValueError):
         return default
 
-DB_HOST = os.getenv("DB_HOST", "")
-DB_PORT = _int_env("DB_PORT", 3306)
-DB_USER = os.getenv("DB_USER", "")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_NAME = os.getenv("DB_NAME", "")
+DB_HOST = "projetos.epcjc.net"
+DB_PORT = 3306
+DB_USER = "i253669"
+DB_PASSWORD = "69oD#We$"
+DB_NAME = "i253669_travelmanagerpro"
 SECRET_KEY = os.getenv("SECRET_KEY", "naturviagens-secret-key")

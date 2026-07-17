@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import smtplib
+raise Exception("TESTE RENDER")
 from email.message import EmailMessage
 from functools import wraps
 from database import criar_tabelas, conectar
@@ -341,7 +342,7 @@ def novo_cliente():
             cursor.execute("""
             INSERT INTO clientes
             (nome,email,telefone,passaporte)
-            VALUES (%s,%s,%s,%s)
+           VALUES (?,?,?,?)
             """,
             (nome, email, telefone, passaporte))
             db.commit()
@@ -471,10 +472,5 @@ def admin():
 
 
 if __name__ == "__main__":
-    try:
-        criar_tabelas()
-        print("Tabelas criadas com sucesso")
-    except Exception as e:
-        print("Erro ao criar tabelas:", e)
-
+    #criar_tabelas()
     app.run(debug=True, host="0.0.0.0")
