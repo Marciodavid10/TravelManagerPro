@@ -2,7 +2,7 @@
 from pathlib import Path
 import json
 import smtplib
-raise Exception("TESTE RENDER")
+print("APP INICIOU")
 from email.message import EmailMessage
 from functools import wraps
 from database import criar_tabelas, conectar
@@ -472,5 +472,5 @@ def admin():
 
 
 if __name__ == "__main__":
-    #criar_tabelas()
+    criar_tabelas()
     app.run(debug=True, host="0.0.0.0")
