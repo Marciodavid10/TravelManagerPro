@@ -295,14 +295,32 @@ def dashboard():
 
     return render_template("dashboard.html", user=user, stats=stats)
 
-
 @app.route("/clientes")
 @login_required
 def clientes():
     user = current_user()
+
     if user["role"] != "admin":
         return redirect(url_for("login"))
-    clients = [u for u in load_users() if u["role"] == "client"]
+
+    try:
+        db = conectar()
+        cursor = db.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id, nome, email, telefone, passaporte
+            FROM clientes
+        """)
+
+        clients = cursor.fetchall()
+
+        cursor.close()
+        db.close()
+
+    except Exception as e:
+        print("Erro ao buscar clientes:", e)
+        clients = []
+
     return render_template("clientes.html", clients=clients)
 
 
@@ -342,7 +360,7 @@ def novo_cliente():
             cursor.execute("""
             INSERT INTO clientes
             (nome,email,telefone,passaporte)
-           VALUES (?,?,?,?)
+           VALUES (%s,%s,%s,%s)
             """,
             (nome, email, telefone, passaporte))
             db.commit()

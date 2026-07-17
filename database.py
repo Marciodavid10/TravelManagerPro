@@ -4,7 +4,7 @@ from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 
 def conectar():
     return mysql.connector.connect(
-        host="projetos.epcjc.net",
+        host="projetos.epcjc.net", 
         port=3306,
         user="i253669",
         password="69oD#We$",
