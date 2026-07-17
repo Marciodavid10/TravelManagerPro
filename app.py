@@ -307,17 +307,18 @@ def clientes():
         db = conectar()
         cursor = db.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM clientes")
+        cursor.execute("""
+            SELECT id, nome, email, telefone, passaporte
+            FROM clientes
+        """)
 
         clients = cursor.fetchall()
-
-        print("CLIENTES ENCONTRADOS:", clients)
 
         cursor.close()
         db.close()
 
     except Exception as e:
-        print("ERRO CLIENTES:", e)
+        print("Erro ao carregar clientes:", e)
         clients = []
 
     return render_template("clientes.html", clients=clients)
