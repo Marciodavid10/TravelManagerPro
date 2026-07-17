@@ -318,7 +318,7 @@ def clientes():
         db.close()
 
     except Exception as e:
-        print("Erro ao buscar clientes:", e)
+        print("Erro ao carregar clientes:", e)
         clients = []
 
     return render_template("clientes.html", clients=clients)
@@ -328,13 +328,34 @@ def clientes():
 @login_required
 def cliente_detalhes(client_id):
     user = current_user()
+
     if user["role"] != "admin":
         return redirect(url_for("login"))
-    client = get_client_by_id(client_id)
+
+    client = None
+
+    try:
+        db = conectar()
+        cursor = db.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id, nome, email, telefone, passaporte
+            FROM clientes
+            WHERE id = %s
+        """, (client_id,))
+
+        client = cursor.fetchone()
+
+        cursor.close()
+        db.close()
+
+    except Exception as e:
+        print("Erro ao buscar cliente:", e)
+
     if client is None:
         return redirect(url_for("clientes"))
-    return render_template("cliente_detalhes.html", client=client)
 
+    return render_template("cliente_detalhes.html", client=client)
 
 @app.route("/novo_cliente", methods=["GET","POST"])
 def novo_cliente():
