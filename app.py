@@ -357,9 +357,17 @@ def cliente_detalhes(client_id):
 
     return render_template("cliente_detalhes.html", client=client)
 
-@app.route("/novo_cliente", methods=["GET","POST"])
+@app.route("/novo_cliente", methods=["GET", "POST"])
+@login_required
 def novo_cliente():
+
+    user = current_user()
+
+    if user["role"] != "admin":
+        return redirect(url_for("login"))
+
     if request.method == "POST":
+
         nome = request.form.get("nome", "").strip()
         email = request.form.get("email", "").strip()
         telefone = request.form.get("telefone", "").strip()
@@ -375,33 +383,41 @@ def novo_cliente():
                 passaporte=passaporte,
             )
 
+        db = None
+
         try:
             db = conectar()
             cursor = db.cursor()
+
             cursor.execute("""
-            INSERT INTO clientes
-            (nome,email,telefone,passaporte)
-           VALUES (%s,%s,%s,%s)
+                INSERT INTO clientes
+                (nome, email, telefone, passaporte)
+                VALUES (%s, %s, %s, %s)
             """,
             (nome, email, telefone, passaporte))
+
             db.commit()
-        except Exception as exc:
-            print("Erro ao guardar cliente:", exc)
+
             return render_template(
                 "novo_cliente.html",
-                error="Não foi possível guardar o cliente. Verifique a base de dados e tente novamente.",
+                success="Cliente criado com sucesso."
+            )
+
+        except Exception as exc:
+            print("Erro ao guardar cliente:", exc)
+
+            return render_template(
+                "novo_cliente.html",
+                error="Não foi possível guardar o cliente.",
                 nome=nome,
                 email=email,
                 telefone=telefone,
                 passaporte=passaporte,
             )
-        finally:
-            try:
-                db.close()
-            except Exception:
-                pass
 
-        return render_template("novo_cliente.html", success="Cliente criado com sucesso.")
+        finally:
+            if db:
+                db.close()
 
     return render_template("novo_cliente.html")
 
