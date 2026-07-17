@@ -463,11 +463,8 @@ def relatorios():
     user = current_user()
     if user["role"] != "admin":
         return redirect(url_for("login"))
-    return render_template("relatorios.html", user=user)
+    return render_template("relatorios.html")
 
-@app.route("/admin")
-def admin():
-    return render_template("admin.html")
 
 
 
