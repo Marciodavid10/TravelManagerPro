@@ -36,7 +36,6 @@ def conectar():
         connection_timeout=10
     )
 
-
 def rows_to_dicts(cursor, rows):
     """Normalize fetched rows to list of dicts for both MySQL and SQLite.
 
