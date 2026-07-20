@@ -399,18 +399,19 @@ def novo_cliente():
             )
 
             db.commit()
-
             cursor.close()
 
             return redirect(url_for("clientes"))
 
         except Exception as e:
+            print("ERRO AO CRIAR CLIENTE:", repr(e))
 
-            print("ERRO AO CRIAR CLIENTE:", e)
+            if db:
+                db.rollback()
 
             return render_template(
                 "novo_cliente.html",
-                error=f"Erro ao criar cliente: {e}",
+                error=f"ERRO REAL: {e}",
                 nome=nome,
                 email=email,
                 telefone=telefone,
@@ -418,7 +419,6 @@ def novo_cliente():
             )
 
         finally:
-
             if db:
                 db.close()
 
