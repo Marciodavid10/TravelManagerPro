@@ -380,7 +380,7 @@ def novo_cliente():
                 nome=nome,
                 email=email,
                 telefone=telefone,
-                passaporte=passaporte,
+                passaporte=passaporte
             )
 
         db = None
@@ -389,33 +389,36 @@ def novo_cliente():
             db = conectar()
             cursor = db.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO clientes
                 (nome, email, telefone, passaporte)
                 VALUES (%s, %s, %s, %s)
-            """,
-            (nome, email, telefone, passaporte))
+                """,
+                (nome, email, telefone, passaporte)
+            )
 
             db.commit()
 
+            cursor.close()
+
+            return redirect(url_for("clientes"))
+
+        except Exception as e:
+
+            print("ERRO AO CRIAR CLIENTE:", e)
+
             return render_template(
                 "novo_cliente.html",
-                success="Cliente criado com sucesso."
-            )
-
-        except Exception as exc:
-            print("Erro ao guardar cliente:", exc)
-
-            return render_template(
-                "novo_cliente.html",
-                error="Não foi possível guardar o cliente.",
+                error=f"Erro ao criar cliente: {e}",
                 nome=nome,
                 email=email,
                 telefone=telefone,
-                passaporte=passaporte,
+                passaporte=passaporte
             )
 
         finally:
+
             if db:
                 db.close()
 
